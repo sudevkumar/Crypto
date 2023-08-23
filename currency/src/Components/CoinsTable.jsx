@@ -14,33 +14,17 @@ import {
 } from "@material-ui/core";
 import { Pagination } from "@material-ui/lab";
 import { makeStyles } from "@material-ui/styles";
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CoinList } from "../Config/api";
+
 import { CryptoState } from "../CryptoContext";
 import { numberWithCommas } from "./Banner/Carousal";
 
 const CoinsTable = () => {
-  const [coins, setCoins] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const { currency, symbol } = CryptoState();
+  const { currency, symbol, loading, coins, fetchCoinList } = CryptoState();
   const navigate = useNavigate();
-
-  const fetchCoinList = async () => {
-    setLoading(true);
-    const { data } = await axios.get(CoinList(currency));
-    setCoins(data);
-    setLoading(false);
-  };
-  console.log(coins);
-
-  useEffect(() => {
-    fetchCoinList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currency]);
 
   const darkTheme = createTheme({
     palette: {
@@ -50,6 +34,11 @@ const CoinsTable = () => {
       type: "dark",
     },
   });
+
+  useEffect(() => {
+    fetchCoinList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currency]);
 
   const tHead = ["Coin", "Price", "24h Change", "Market Cap"];
 
@@ -78,8 +67,6 @@ const CoinsTable = () => {
   }));
 
   const classes = useStyles();
-
-
 
   return (
     <ThemeProvider theme={darkTheme}>

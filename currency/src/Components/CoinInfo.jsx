@@ -27,7 +27,7 @@ const CoinInfo = ({ coin }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currency, day]);
 
-  console.log(historicalData);
+
 
   const useStyles = makeStyles((theme) => ({
     container: {

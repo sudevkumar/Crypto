@@ -42,7 +42,7 @@ const Banner = () => {
               fontFamily: "Poppins",
             }}
           >
-            Crypto Hunter
+            Crypto Bar
           </Typography>
           <Typography
             variant="subtitle2"

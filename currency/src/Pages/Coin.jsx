@@ -1,4 +1,9 @@
-import { LinearProgress, makeStyles, Typography } from "@material-ui/core";
+import {
+  Button,
+  LinearProgress,
+  makeStyles,
+  Typography,
+} from "@material-ui/core";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -7,23 +12,71 @@ import { SingleCoin } from "../Config/api";
 import { CryptoState } from "../CryptoContext";
 import ReactHtmlParser from "react-html-parser";
 import { numberWithCommas } from "../Components/Banner/Carousal";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 const Coin = () => {
   const { id } = useParams();
   const [coin, setCoin] = useState();
-  const { currency, symbol } = CryptoState();
+  const { currency, symbol, user, setAlert, watchlist } = CryptoState();
 
   const fetchCoinData = async () => {
     const { data } = await axios.get(SingleCoin(id));
     setCoin(data);
   };
 
-  console.log(coin);
-
   useEffect(() => {
     fetchCoinData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const addToWatchlist = async () => {
+    const coinRef = doc(db, "watchlist", user.uid);
+    try {
+      await setDoc(
+        coinRef,
+        { coins: watchlist ? [...watchlist, coin?.id] : [coin?.id] },
+        { merge: true }
+      );
+
+      setAlert({
+        open: true,
+        message: `${coin.name} Added to the Watchlist !`,
+        type: "success",
+      });
+    } catch (error) {
+      setAlert({
+        open: true,
+        message: error.message,
+        type: "error",
+      });
+    }
+  };
+
+  const inWatchlist = watchlist.includes(coin?.id);
+
+  const removeFromWatchlist = async () => {
+    const coinRef = doc(db, "watchlist", user.uid);
+    try {
+      await setDoc(
+        coinRef,
+        { coins: watchlist.filter((wish) => wish !== coin?.id) },
+        { merge: true }
+      );
+
+      setAlert({
+        open: true,
+        message: `${coin.name} Removed from the Watchlist !`,
+        type: "success",
+      });
+    } catch (error) {
+      setAlert({
+        open: true,
+        message: error.message,
+        type: "error",
+      });
+    }
+  };
 
   const useStyles = makeStyles((theme) => ({
     container: {
@@ -143,7 +196,7 @@ const Coin = () => {
               M
             </Typography>
           </span>
-          {/* {user && (
+          {user && (
             <Button
               variant="outlined"
               style={{
@@ -155,7 +208,7 @@ const Coin = () => {
             >
               {inWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
             </Button>
-          )} */}
+          )}
         </div>
       </div>
       <CoinInfo coin={coin} />
